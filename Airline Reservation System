@@ -1,0 +1,180 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+public class AirlineReservationSystem extends JFrame {
+    private ArrayList<Passenger> passengers;
+    private ArrayList<String> availableSeats;
+    private JTextArea textArea;
+    private JTextField nameField, seatField, flightField;
+
+    public AirlineReservationSystem() {
+        passengers = new ArrayList<>();
+        availableSeats = new ArrayList<>();
+        initializeAvailableSeats();
+        
+        setTitle("Airline Reservation System");
+        setSize(400, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new FlowLayout());
+
+        JLabel nameLabel = new JLabel("Passenger Name:");
+        nameField = new JTextField(15);
+        JLabel seatLabel = new JLabel("Seat Number:");
+        seatField = new JTextField(5);
+        JLabel flightLabel = new JLabel("Flight Number:");
+        flightField = new JTextField(10);
+
+        JButton bookButton = new JButton("Book");
+        JButton cancelButton = new JButton("Cancel");
+        JButton viewButton = new JButton("View Bookings");
+        JButton viewSeatsButton = new JButton("View Available Seats");
+
+        textArea = new JTextArea(10, 30);
+        textArea.setEditable(false);
+
+        bookButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                bookTicket();
+            }
+        });
+
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cancelTicket();
+            }
+        });
+
+        viewButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewBookings();
+            }
+        });
+
+        viewSeatsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewAvailableSeats();
+            }
+        });
+
+        add(nameLabel);
+        add(nameField);
+        add(seatLabel);
+        add(seatField);
+        add(flightLabel);
+        add(flightField);
+        add(bookButton);
+        add(cancelButton);
+        add(viewButton);
+        add(viewSeatsButton);
+        add(new JScrollPane(textArea));
+
+        setVisible(true);
+    }
+
+    private void initializeAvailableSeats() {
+        // Initialize seats from 1 to 30 for example
+        for (int i = 1; i <= 30; i++) {
+            availableSeats.add(String.valueOf(i));
+        }
+    }
+
+    private void bookTicket() {
+        String name = nameField.getText();
+        String seat = seatField.getText();
+        String flight = flightField.getText();
+
+        if (name.isEmpty() || seat.isEmpty() || flight.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter name, seat number, and flight number.");
+            return;
+        }
+
+        if (!availableSeats.contains(seat)) {
+            JOptionPane.showMessageDialog(this, "Seat " + seat + " is not available.");
+            return;
+        }
+
+        Passenger passenger = new Passenger(name, seat, flight);
+        passengers.add(passenger);
+        availableSeats.remove(seat); // Mark the seat as unavailable
+        JOptionPane.showMessageDialog(this, "Ticket booked successfully!");
+        nameField.setText("");
+        seatField.setText("");
+        flightField.setText("");
+    }
+
+    private void cancelTicket() {
+        String name = nameField.getText();
+
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter the passenger name to cancel.");
+            return;
+        }
+
+        for (int i = 0; i < passengers.size(); i++) {
+            Passenger passenger = passengers.get(i);
+            if (passenger.getName().equalsIgnoreCase(name)) {
+                availableSeats.add(passenger.getSeat()); // Mark the seat as available again
+                passengers.remove(i);
+                JOptionPane.showMessageDialog(this, "Ticket cancelled successfully!");
+                nameField.setText("");
+                seatField.setText("");
+                flightField.setText("");
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(this, "No booking found for the given name.");
+    }
+
+    private void viewBookings() {
+        textArea.setText("");
+        if (passengers.isEmpty()) {
+            textArea.append("No bookings available.\n");
+        } else {
+            for (Passenger passenger : passengers) {
+                textArea.append("Name: " + passenger.getName() + ", Seat: " + passenger.getSeat() + ", Flight: " + passenger.getFlight() + "\n");
+            }
+        }
+    }
+
+    private void viewAvailableSeats() {
+        textArea.setText("Available Seats:\n");
+        if (availableSeats .isEmpty()) {
+            textArea.append("No seats available.\n");
+        } else {
+            for (String seat : availableSeats) {
+                textArea.append(seat + " ");
+            }
+            textArea.append("\n");
+        }
+    }
+
+    public static void main(String[] args) {
+        new AirlineReservationSystem();
+    }
+}
+
+class Passenger {
+    private String name;
+    private String seat;
+    private String flight;
+
+    public Passenger(String name, String seat, String flight) {
+        this.name = name;
+        this.seat = seat;
+        this.flight = flight;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSeat() {
+        return seat;
+    }
+
+    public String getFlight() {
+        return flight;
+    }
+}
